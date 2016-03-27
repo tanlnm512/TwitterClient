@@ -1,12 +1,8 @@
-package vn.creative.twitterclient.view;
+package vn.creative.twitterclient;
 
-import android.app.ActivityOptions;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.codepath.oauth.OAuthLoginActionBarActivity;
@@ -14,6 +10,7 @@ import com.codepath.oauth.OAuthLoginActionBarActivity;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import vn.creative.twitterclient.R;
+import vn.creative.twitterclient.TwitterActivity;
 import vn.creative.twitterclient.service.RestClient;
 
 public class SplashActivity extends OAuthLoginActionBarActivity<RestClient> {

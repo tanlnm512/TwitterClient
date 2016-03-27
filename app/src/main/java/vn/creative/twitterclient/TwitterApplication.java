@@ -9,7 +9,7 @@ import vn.creative.twitterclient.service.RestClient;
 /**
  * Created by tanlnm on 3/24/2016.
  */
-public class MainApplication extends Application {
+public class TwitterApplication extends Application {
     private static Context mContext;
 
     @Override
@@ -19,6 +19,6 @@ public class MainApplication extends Application {
     }
 
     public static RestClient getRestClient() {
-        return (RestClient) RestClient.getInstance(RestClient.class, mContext);
+        return (RestClient) RestClient.getInstance(RestClient.class, TwitterApplication.mContext);
     }
 }

@@ -5,6 +5,6 @@
         android:id="@+id/compose_tweet"
         android:icon="@mipmap/compose_tweet"
         app:showAsAction="ifRoom|withText"
-        android:title="Compose">
+        android:title="Tweet">
     </item>
 </menu>
