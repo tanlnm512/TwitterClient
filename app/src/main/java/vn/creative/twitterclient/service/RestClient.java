@@ -4,12 +4,10 @@ import android.content.Context;
 
 import com.codepath.oauth.OAuthBaseClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
-import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.TwitterApi;
-import org.scribe.model.Token;
 
 /**
  * Created by tanlnm on 3/24/2016.
@@ -25,11 +23,20 @@ public class RestClient extends OAuthBaseClient {
         super(context, REST_API_CLASS, REST_URL, REST_CONSUMER_KEY, REST_CONSUMER_SECRET, REST_CALLBACK_URL);
     }
 
-    public void getHomeTimeline(long id, AsyncHttpResponseHandler handler) {
+    public void getHomeTimeline(long sinceId, AsyncHttpResponseHandler handler) {
         String apiUrl = getApiUrl("/statuses/home_timeline.json");
         RequestParams params = new RequestParams();
-        params.put("count", 25);
-        params.put("since_id", id);
+        params.put("count", 40);
+        params.put("since_id", sinceId);
+        getClient().get(apiUrl, params, handler);
+    }
+
+    public void getUserTimeline(long userId, long sinceId, AsyncHttpResponseHandler handler) {
+        String apiUrl = getApiUrl("/statuses/user_timeline.json");
+        RequestParams params = new RequestParams();
+        params.put("count", 40);
+        params.put("user_id", userId);
+        params.put("since_id", sinceId);
         getClient().get(apiUrl, params, handler);
     }
 }

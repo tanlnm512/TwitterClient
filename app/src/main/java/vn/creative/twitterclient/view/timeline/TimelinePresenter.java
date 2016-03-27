@@ -5,6 +5,7 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.lang.reflect.Type;
@@ -30,7 +31,7 @@ public class TimelinePresenter implements ITimelinePresenter, IFetchTimelineList
     }
 
     @Override
-    public void onSuccess(JSONObject response) {
+    public void onSuccess(JSONArray response) {
         Type type = new TypeToken<List<PostModel>>() {
         }.getType();
         List<PostModel> posts = new Gson().fromJson(response.toString(), type);
@@ -38,8 +39,8 @@ public class TimelinePresenter implements ITimelinePresenter, IFetchTimelineList
     }
 
     @Override
-    public void onFail(Throwable throwable) {
+    public void onFail(JSONObject error, Throwable throwable) {
         timelineView.onFetchTimelineFail();
-        Log.e("DEBUG", "fetch timeline fail!", throwable);
+        Log.e("DEBUG", error.toString(), throwable);
     }
 }

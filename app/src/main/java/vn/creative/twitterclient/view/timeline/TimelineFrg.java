@@ -6,6 +6,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,6 +20,7 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import vn.creative.twitterclient.R;
+import vn.creative.twitterclient.adapter.TimelineAdapter;
 import vn.creative.twitterclient.model.PostModel;
 
 /**
@@ -29,10 +32,14 @@ public class TimelineFrg extends Fragment implements ITimelineView {
     @Bind(R.id.swipe_layout)
     SwipeRefreshLayout swipeLayout;
 
+    @Bind(R.id.rv_timeline)
+    RecyclerView rvTimeline;
+
     private long nCurID = 1;
 
     private ActionBar actionBar;
     private TimelinePresenter timelinePresenter;
+    private TimelineAdapter timelineAdapter;
 
     @Nullable
     @Override
@@ -65,6 +72,18 @@ public class TimelineFrg extends Fragment implements ITimelineView {
             }
         });
 
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
+        rvTimeline.setLayoutManager(linearLayoutManager);
+        timelineAdapter = new TimelineAdapter(getContext());
+        rvTimeline.setAdapter(timelineAdapter);
+
+        rvTimeline.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount) {
+                timelinePresenter.fetchTimeline(nCurID);
+            }
+        });
+
         timelinePresenter.fetchTimeline(nCurID);
 
         return view;
@@ -72,20 +91,21 @@ public class TimelineFrg extends Fragment implements ITimelineView {
 
     @Override
     public void onFetchTimelineSuccess(List<PostModel> posts) {
-        if (swipeLayout.isRefreshing()) {
-            swipeLayout.setRefreshing(false);
+        swipeLayout.setRefreshing(false);
+
+        if (nCurID == 1) {
+            timelineAdapter.update(posts);
+
+        } else {
+            timelineAdapter.updateMore(posts);
         }
 
-        for (PostModel post : posts) {
-            System.out.println(post.toString());
-        }
+        nCurID = posts.get(posts.size() - 1).getId();
     }
 
     @Override
     public void onFetchTimelineFail() {
-        if (swipeLayout.isRefreshing()) {
-            swipeLayout.setRefreshing(false);
-        }
+        swipeLayout.setRefreshing(false);
         Toast.makeText(getContext(), "Get Twitter timeline fail!", Toast.LENGTH_SHORT).show();
     }
 

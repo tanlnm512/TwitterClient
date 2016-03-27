@@ -3,6 +3,7 @@ package vn.creative.twitterclient.view.timeline;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.apache.http.Header;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import vn.creative.twitterclient.TwitterApplication;
@@ -15,13 +16,13 @@ public class TimelineInteractor implements ITimelineInteractor {
     public void getHomeTimeline(long id, final IFetchTimelineListener listener) {
         TwitterApplication.getRestClient().getHomeTimeline(id, new JsonHttpResponseHandler() {
             @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
                 listener.onSuccess(response);
             }
 
             @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                listener.onFail(throwable);
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                listener.onFail(errorResponse, throwable);
             }
         });
     }
