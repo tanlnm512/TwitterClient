@@ -22,11 +22,12 @@ import butterknife.ButterKnife;
 import vn.creative.twitterclient.R;
 import vn.creative.twitterclient.adapter.TimelineAdapter;
 import vn.creative.twitterclient.model.PostModel;
+import vn.creative.twitterclient.view.reply.ReplyDlg;
 
 /**
  * Created by tanlnm on 3/25/2016.
  */
-public class TimelineFrg extends Fragment implements ITimelineView {
+public class TimelineFrg extends Fragment implements ITimelineView, ITimelineActionListener {
     private static final String TAG = TimelineFrg.class.getSimpleName();
 
     @Bind(R.id.swipe_layout)
@@ -74,7 +75,7 @@ public class TimelineFrg extends Fragment implements ITimelineView {
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         rvTimeline.setLayoutManager(linearLayoutManager);
-        timelineAdapter = new TimelineAdapter(getContext());
+        timelineAdapter = new TimelineAdapter(getContext(), this);
         rvTimeline.setAdapter(timelineAdapter);
 
         rvTimeline.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
@@ -84,6 +85,7 @@ public class TimelineFrg extends Fragment implements ITimelineView {
             }
         });
 
+        // First time load data
         timelinePresenter.fetchTimeline(nCurID);
 
         return view;
@@ -107,6 +109,30 @@ public class TimelineFrg extends Fragment implements ITimelineView {
     public void onFetchTimelineFail() {
         swipeLayout.setRefreshing(false);
         Toast.makeText(getContext(), "Get Twitter timeline fail!", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onItemClick(PostModel post) {
+
+    }
+
+    @Override
+    public void onReplyClick(PostModel post) {
+        ReplyDlg replyDlg = new ReplyDlg();
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("post", post);
+        replyDlg.setArguments(bundle);
+        replyDlg.show(getFragmentManager(), "ReplyDlg");
+    }
+
+    @Override
+    public void onRetweetClick(PostModel post) {
+
+    }
+
+    @Override
+    public void onLikeClick(PostModel post) {
+
     }
 
     @Override

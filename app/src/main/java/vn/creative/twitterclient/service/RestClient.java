@@ -31,12 +31,11 @@ public class RestClient extends OAuthBaseClient {
         getClient().get(apiUrl, params, handler);
     }
 
-    public void getUserTimeline(long userId, long sinceId, AsyncHttpResponseHandler handler) {
-        String apiUrl = getApiUrl("/statuses/user_timeline.json");
+    public void replyTweet(String tweet, long tweetId, AsyncHttpResponseHandler handler) {
+        String apiUrl = getApiUrl("/statuses/update.json");
         RequestParams params = new RequestParams();
-        params.put("count", 40);
-        params.put("user_id", userId);
-        params.put("since_id", sinceId);
-        getClient().get(apiUrl, params, handler);
+        params.put("status", tweet);
+        params.put("in_reply_to_status_id", tweetId);
+        getClient().post(apiUrl, params, handler);
     }
 }

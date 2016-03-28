@@ -1,11 +1,14 @@
 package vn.creative.twitterclient.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.SerializedName;
 
 /**
  * Created by minhtan512 on 3/27/2016.
  */
-public class UserModel {
+public class UserModel implements Parcelable {
     @SerializedName("id")
     private long id;
 
@@ -43,4 +46,39 @@ public class UserModel {
                 ", avatar='" + avatar + '\'' +
                 '}';
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(this.id);
+        dest.writeString(this.name);
+        dest.writeString(this.screenName);
+        dest.writeString(this.avatar);
+    }
+
+    public UserModel() {
+    }
+
+    protected UserModel(Parcel in) {
+        this.id = in.readLong();
+        this.name = in.readString();
+        this.screenName = in.readString();
+        this.avatar = in.readString();
+    }
+
+    public static final Parcelable.Creator<UserModel> CREATOR = new Parcelable.Creator<UserModel>() {
+        @Override
+        public UserModel createFromParcel(Parcel source) {
+            return new UserModel(source);
+        }
+
+        @Override
+        public UserModel[] newArray(int size) {
+            return new UserModel[size];
+        }
+    };
 }

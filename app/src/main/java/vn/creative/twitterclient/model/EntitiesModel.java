@@ -1,13 +1,17 @@
 package vn.creative.twitterclient.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by minhtan512 on 3/27/2016.
  */
-public class EntitiesModel {
+public class EntitiesModel implements Parcelable {
     @SerializedName("media")
     private List<Media> media;
 
@@ -93,4 +97,40 @@ public class EntitiesModel {
                     '}';
         }
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeList(this.media);
+        dest.writeList(this.urls);
+        dest.writeList(this.hashTags);
+    }
+
+    public EntitiesModel() {
+    }
+
+    protected EntitiesModel(Parcel in) {
+        this.media = new ArrayList<Media>();
+        in.readList(this.media, Media.class.getClassLoader());
+        this.urls = new ArrayList<URLs>();
+        in.readList(this.urls, URLs.class.getClassLoader());
+        this.hashTags = new ArrayList<HashTag>();
+        in.readList(this.hashTags, HashTag.class.getClassLoader());
+    }
+
+    public static final Parcelable.Creator<EntitiesModel> CREATOR = new Parcelable.Creator<EntitiesModel>() {
+        @Override
+        public EntitiesModel createFromParcel(Parcel source) {
+            return new EntitiesModel(source);
+        }
+
+        @Override
+        public EntitiesModel[] newArray(int size) {
+            return new EntitiesModel[size];
+        }
+    };
 }

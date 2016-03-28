@@ -16,6 +16,7 @@ import vn.creative.twitterclient.R;
 import vn.creative.twitterclient.common.RoundedTransformation;
 import vn.creative.twitterclient.common.TimeUtils;
 import vn.creative.twitterclient.model.PostModel;
+import vn.creative.twitterclient.view.timeline.ITimelineActionListener;
 
 /**
  * Created by minhtan512 on 3/27/2016.
@@ -23,15 +24,17 @@ import vn.creative.twitterclient.model.PostModel;
 public class TimelineAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private Context mContext;
     private List<PostModel> posts;
+    private ITimelineActionListener mListener;
 
-    public TimelineAdapter(Context context) {
+    public TimelineAdapter(Context context, ITimelineActionListener listener) {
         mContext = context;
         posts = new ArrayList<>();
+        mListener = listener;
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
-        RecyclerView.ViewHolder viewHolder = null;
+        RecyclerView.ViewHolder viewHolder;
         LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
         View coverView = inflater.inflate(R.layout.item_post, viewGroup, false);
         viewHolder = new TimelineHolder(coverView);
@@ -42,7 +45,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         TimelineHolder timelineHolder = (TimelineHolder) holder;
 
-        PostModel post = posts.get(position);
+        final PostModel post = posts.get(position);
         Picasso.with(mContext)
                 .load(post.getUser().getAvatar())
                 .transform(new RoundedTransformation(20, 0))
@@ -50,25 +53,63 @@ public class TimelineAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 .centerCrop()
                 .tag(mContext)
                 .into(timelineHolder.ivAvatar);
-        timelineHolder.tvScreenName.setText(post.getUser().getScreenName());
-        timelineHolder.tvName.setText("@" + post.getUser().getName());
+        timelineHolder.tvScreenName.setText("@" + post.getUser().getScreenName());
+        timelineHolder.tvName.setText(post.getUser().getName());
         timelineHolder.tvTime.setText(TimeUtils.getRelativeTimeAgo(post.getCreatedAt()));
 
         if (!TextUtils.isEmpty(post.getText())) {
+            timelineHolder.tvPost.setVisibility(View.VISIBLE);
             timelineHolder.tvPost.setText(post.getText());
         } else {
             timelineHolder.tvPost.setVisibility(View.GONE);
         }
 
         if (post.getEntities().getMedia() != null && post.getEntities().getMedia().size() > 0) {
+            timelineHolder.ivPhoto.setVisibility(View.VISIBLE);
             Picasso.with(mContext)
                     .load(post.getEntities().getMedia().get(0).getUrl())
+                    .placeholder(R.mipmap.photo_placeholder)
                     .transform(new RoundedTransformation(10, 0))
                     .tag(mContext)
                     .into(timelineHolder.ivPhoto);
         } else {
             timelineHolder.ivPhoto.setVisibility(View.GONE);
         }
+
+        timelineHolder.tvPost.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onItemClick(post);
+            }
+        });
+
+        timelineHolder.ivPhoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onItemClick(post);
+            }
+        });
+
+        timelineHolder.ivReply.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onReplyClick(post);
+            }
+        });
+
+        timelineHolder.ivRetweet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onReplyClick(post);
+            }
+        });
+
+        timelineHolder.ivLike.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onReplyClick(post);
+            }
+        });
     }
 
     @Override
