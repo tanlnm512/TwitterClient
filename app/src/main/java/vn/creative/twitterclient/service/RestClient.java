@@ -38,4 +38,19 @@ public class RestClient extends OAuthBaseClient {
         params.put("in_reply_to_status_id", tweetId);
         getClient().post(apiUrl, params, handler);
     }
+
+    public void tweet(String tweet, AsyncHttpResponseHandler handler) {
+        String apiUrl = getApiUrl("/statuses/update.json");
+        RequestParams params = new RequestParams();
+        params.put("status", tweet);
+        getClient().post(apiUrl, params, handler);
+    }
+
+    public void getUserInfo(AsyncHttpResponseHandler handler){
+        String apiUrl = getApiUrl("/account/verify_credentials.json");
+        RequestParams params = new RequestParams();
+        params.put("skip_status", true);
+        params.put("include_entities", false);
+        getClient().get(apiUrl, params, handler);
+    }
 }

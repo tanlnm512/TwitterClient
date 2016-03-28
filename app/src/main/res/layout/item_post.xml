@@ -77,8 +77,7 @@
             <ImageView
                 android:id="@+id/iv_photo"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:src="@mipmap/photo_placeholder" />
+                android:layout_height="wrap_content"/>
         </RelativeLayout>
 
         <LinearLayout

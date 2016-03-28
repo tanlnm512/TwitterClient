@@ -56,6 +56,8 @@ public class TimelineAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         timelineHolder.tvScreenName.setText("@" + post.getUser().getScreenName());
         timelineHolder.tvName.setText(post.getUser().getName());
         timelineHolder.tvTime.setText(TimeUtils.getRelativeTimeAgo(post.getCreatedAt()));
+        timelineHolder.tvRetweetCount.setText(String.valueOf(post.getRetweetCount()));
+        timelineHolder.tvLikeCount.setText(String.valueOf(post.getFavoriteCount()));
 
         if (!TextUtils.isEmpty(post.getText())) {
             timelineHolder.tvPost.setVisibility(View.VISIBLE);
@@ -68,10 +70,12 @@ public class TimelineAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             timelineHolder.ivPhoto.setVisibility(View.VISIBLE);
             Picasso.with(mContext)
                     .load(post.getEntities().getMedia().get(0).getUrl())
-                    .placeholder(R.mipmap.photo_placeholder)
+//                    .placeholder(R.mipmap.photo_placeholder)
                     .transform(new RoundedTransformation(10, 0))
                     .tag(mContext)
+                    .noPlaceholder()
                     .into(timelineHolder.ivPhoto);
+
         } else {
             timelineHolder.ivPhoto.setVisibility(View.GONE);
         }

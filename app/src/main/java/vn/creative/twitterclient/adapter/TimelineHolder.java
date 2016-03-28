@@ -27,6 +27,8 @@ public class TimelineHolder extends RecyclerView.ViewHolder {
     @Bind(R.id.tv_name) TextView tvName;
     @Bind(R.id.tv_time) TextView tvTime;
     @Bind(R.id.tv_post) TextView tvPost;
+    @Bind(R.id.tv_retweet_count) TextView tvRetweetCount;
+    @Bind(R.id.tv_like_count) TextView tvLikeCount;
 
     private ITimelineActionListener mListener;
 

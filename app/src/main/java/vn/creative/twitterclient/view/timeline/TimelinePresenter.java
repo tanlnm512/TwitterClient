@@ -11,6 +11,7 @@ import org.json.JSONObject;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import vn.creative.twitterclient.model.DBPost;
 import vn.creative.twitterclient.model.PostModel;
 
 /**
@@ -35,12 +36,16 @@ public class TimelinePresenter implements ITimelinePresenter, IFetchTimelineList
         Type type = new TypeToken<List<PostModel>>() {
         }.getType();
         List<PostModel> posts = new Gson().fromJson(response.toString(), type);
+        for (PostModel post : posts) {
+            DBPost dbPost = new DBPost(new Gson().toJson(post));
+            dbPost.save();
+        }
         timelineView.onFetchTimelineSuccess(posts);
     }
 
     @Override
     public void onFail(JSONObject error, Throwable throwable) {
         timelineView.onFetchTimelineFail();
-        Log.e("DEBUG", error.toString(), throwable);
+        Log.e("DEBUG", "fetch timeline fail!", throwable);
     }
 }

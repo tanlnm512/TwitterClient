@@ -1,5 +1,8 @@
 package vn.creative.twitterclient.view.timeline;
 
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -11,23 +14,29 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import vn.creative.twitterclient.R;
 import vn.creative.twitterclient.adapter.TimelineAdapter;
+import vn.creative.twitterclient.common.NetworkUtils;
+import vn.creative.twitterclient.model.DBPost;
 import vn.creative.twitterclient.model.PostModel;
-import vn.creative.twitterclient.view.reply.ReplyDlg;
+import vn.creative.twitterclient.view.tweet.TweetDlg;
 
 /**
  * Created by tanlnm on 3/25/2016.
  */
-public class TimelineFrg extends Fragment implements ITimelineView, ITimelineActionListener {
+public class TimelineFrg extends Fragment implements ITimelineView, ITimelineActionListener, DialogInterface.OnDismissListener {
     private static final String TAG = TimelineFrg.class.getSimpleName();
 
     @Bind(R.id.swipe_layout)
@@ -68,8 +77,14 @@ public class TimelineFrg extends Fragment implements ITimelineView, ITimelineAct
         swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                nCurID = 1;
-                timelinePresenter.fetchTimeline(nCurID);
+                if (NetworkUtils.isNetworkAvailable(getContext())) {
+                    nCurID = 1;
+                    timelinePresenter.fetchTimeline(nCurID);
+
+                } else {
+                    swipeLayout.setRefreshing(false);
+                    Toast.makeText(getContext(), "Network error!", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -81,12 +96,29 @@ public class TimelineFrg extends Fragment implements ITimelineView, ITimelineAct
         rvTimeline.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
-                timelinePresenter.fetchTimeline(nCurID);
+                if (NetworkUtils.isNetworkAvailable(getContext())) {
+                    timelinePresenter.fetchTimeline(nCurID);
+
+                } else {
+                    Toast.makeText(getContext(), "Network error!", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
         // First time load data
-        timelinePresenter.fetchTimeline(nCurID);
+        if (NetworkUtils.isNetworkAvailable(getContext())) {
+            timelinePresenter.fetchTimeline(nCurID);
+
+        } else {
+            List<PostModel> posts = new ArrayList<>();
+            for (DBPost dbPost : DBPost.getPosts()) {
+                PostModel post = new Gson().fromJson(dbPost.getPostJson(), PostModel.class);
+                if (post != null) {
+                    posts.add(post);
+                }
+            }
+            onFetchTimelineSuccess(posts);
+        }
 
         return view;
     }
@@ -102,7 +134,9 @@ public class TimelineFrg extends Fragment implements ITimelineView, ITimelineAct
             timelineAdapter.updateMore(posts);
         }
 
-        nCurID = posts.get(posts.size() - 1).getId();
+        if (!posts.isEmpty()) {
+            nCurID = posts.get(posts.size() - 1).getId();
+        }
     }
 
     @Override
@@ -113,16 +147,18 @@ public class TimelineFrg extends Fragment implements ITimelineView, ITimelineAct
 
     @Override
     public void onItemClick(PostModel post) {
-
+        String url = "https://twitter.com/" + post.getUser().getScreenName() + "/status/" + post.getId();
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        startActivity(browserIntent);
     }
 
     @Override
     public void onReplyClick(PostModel post) {
-        ReplyDlg replyDlg = new ReplyDlg();
+        TweetDlg tweetDlg = new TweetDlg();
         Bundle bundle = new Bundle();
         bundle.putParcelable("post", post);
-        replyDlg.setArguments(bundle);
-        replyDlg.show(getFragmentManager(), "ReplyDlg");
+        tweetDlg.setArguments(bundle);
+        tweetDlg.show(getFragmentManager(), "TweetDlg");
     }
 
     @Override
@@ -139,6 +175,27 @@ public class TimelineFrg extends Fragment implements ITimelineView, ITimelineAct
     public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         menu.clear();
         menuInflater.inflate(R.menu.main_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.compose_tweet:
+                TweetDlg tweetDlg = new TweetDlg();
+                tweetDlg.show(getFragmentManager(), "TweetDlg");
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        if (NetworkUtils.isNetworkAvailable(getContext())) {
+            nCurID = 1;
+            timelinePresenter.fetchTimeline(nCurID);
+        }
     }
 
     @Override

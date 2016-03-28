@@ -4,6 +4,7 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.apache.http.Header;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import vn.creative.twitterclient.TwitterApplication;
@@ -18,6 +19,13 @@ public class TimelineInteractor implements ITimelineInteractor {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
                 listener.onSuccess(response);
+//                try {
+//                    for(int i = 0; i < response.length(); i++) {
+//                        System.out.println(">>> " + response.getJSONObject(i).toString());
+//                    }
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
             }
 
             @Override

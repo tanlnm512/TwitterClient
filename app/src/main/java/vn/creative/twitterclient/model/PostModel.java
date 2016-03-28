@@ -24,6 +24,12 @@ public class PostModel implements Parcelable {
     @SerializedName("user")
     private UserModel user;
 
+    @SerializedName("retweet_count")
+    private int retweetCount;
+
+    @SerializedName("favorite_count")
+    private int favoriteCount;
+
     public String getCreatedAt() {
         return createdAt;
     }
@@ -44,6 +50,14 @@ public class PostModel implements Parcelable {
         return user;
     }
 
+    public int getRetweetCount() {
+        return retweetCount;
+    }
+
+    public int getFavoriteCount() {
+        return favoriteCount;
+    }
+
     @Override
     public String toString() {
         return "PostModel{" +
@@ -52,6 +66,8 @@ public class PostModel implements Parcelable {
                 ", text='" + text + '\'' +
                 ", entities=" + entities +
                 ", user=" + user +
+                ", retweetCount=" + retweetCount +
+                ", favoriteCount=" + favoriteCount +
                 '}';
     }
 
@@ -67,6 +83,8 @@ public class PostModel implements Parcelable {
         dest.writeString(this.text);
         dest.writeParcelable(this.entities, flags);
         dest.writeParcelable(this.user, flags);
+        dest.writeInt(this.retweetCount);
+        dest.writeInt(this.favoriteCount);
     }
 
     public PostModel() {
@@ -78,6 +96,8 @@ public class PostModel implements Parcelable {
         this.text = in.readString();
         this.entities = in.readParcelable(EntitiesModel.class.getClassLoader());
         this.user = in.readParcelable(UserModel.class.getClassLoader());
+        this.retweetCount = in.readInt();
+        this.favoriteCount = in.readInt();
     }
 
     public static final Parcelable.Creator<PostModel> CREATOR = new Parcelable.Creator<PostModel>() {

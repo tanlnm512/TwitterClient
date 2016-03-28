@@ -2,6 +2,7 @@ package vn.creative.twitterclient;
 
 import android.content.Context;
 
+import com.activeandroid.ActiveAndroid;
 import com.activeandroid.app.Application;
 
 import vn.creative.twitterclient.service.RestClient;

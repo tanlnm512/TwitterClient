@@ -1,10 +1,13 @@
-package vn.creative.twitterclient.view.reply;
+package vn.creative.twitterclient.view.tweet;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,8 +16,12 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.squareup.picasso.Picasso;
+
+import org.apache.http.Header;
+import org.json.JSONObject;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -23,11 +30,13 @@ import vn.creative.twitterclient.R;
 import vn.creative.twitterclient.TwitterApplication;
 import vn.creative.twitterclient.common.RoundedTransformation;
 import vn.creative.twitterclient.model.PostModel;
+import vn.creative.twitterclient.model.UserModel;
+import vn.creative.twitterclient.view.timeline.TimelineFrg;
 
 /**
  * Created by tanlnm on 3/28/2016.
  */
-public class ReplyDlg extends DialogFragment {
+public class TweetDlg extends DialogFragment {
     @Bind(R.id.dlg_tv_screen_name)
     TextView tvScreenName;
 
@@ -87,8 +96,8 @@ public class ReplyDlg extends DialogFragment {
             }
         });
 
-        post = (PostModel) getArguments().get("post");
-        if (post != null) {
+        if (getArguments() != null) {
+            post = (PostModel) getArguments().get("post");
             Picasso.with(getContext())
                     .load(post.getUser().getAvatar())
                     .transform(new RoundedTransformation(20, 0))
@@ -101,6 +110,31 @@ public class ReplyDlg extends DialogFragment {
             tvScreenName.setText("@" + post.getUser().getScreenName());
 
             etTweet.setText("@" + post.getUser().getScreenName());
+
+        } else {
+            TwitterApplication.getRestClient().getUserInfo(new JsonHttpResponseHandler() {
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    UserModel user = new Gson().fromJson(response.toString(), UserModel.class);
+                    if(user != null) {
+                        Picasso.with(getContext())
+                                .load(user.getAvatar())
+                                .transform(new RoundedTransformation(20, 0))
+                                .resize(150, 150)
+                                .centerCrop()
+                                .tag(getContext())
+                                .into(ivAvatar);
+
+                        tvName.setText(user.getName());
+                        tvScreenName.setText("@" + user.getScreenName());
+                    }
+                }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                    Log.e("DEBUG", "get user info fail!", throwable);
+                }
+            });
         }
 
         return view;
@@ -113,7 +147,12 @@ public class ReplyDlg extends DialogFragment {
 
     @OnClick(R.id.dlg_btn_tweet)
     void tweet() {
-        TwitterApplication.getRestClient().replyTweet(etTweet.getText().toString(), post.getId(), new JsonHttpResponseHandler());
+        if (post != null) {
+            TwitterApplication.getRestClient().replyTweet(etTweet.getText().toString(), post.getId(), new JsonHttpResponseHandler());
+
+        } else {
+            TwitterApplication.getRestClient().tweet(etTweet.getText().toString(), new JsonHttpResponseHandler());
+        }
         dismiss();
     }
 
@@ -121,5 +160,14 @@ public class ReplyDlg extends DialogFragment {
     public void onDestroyView() {
         super.onDestroyView();
         ButterKnife.unbind(this);
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
+        Fragment frg = getFragmentManager().findFragmentByTag("TimelineFrg");
+        if (frg instanceof TimelineFrg) {
+            ((DialogInterface.OnDismissListener) frg).onDismiss(dialog);
+        }
     }
 }
